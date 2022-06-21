@@ -2,6 +2,7 @@ import base64
 import logging
 import os
 
+import sentry_sdk
 from flask import Flask
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -14,6 +15,12 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 with open("credentials.json", "w") as file:
     file.write(base64.b64decode(os.getenv("GOOGLE_CREDENTIALS_BASE64")).decode("utf-8"))
+
+sentry_sdk.init(
+    os.getenv("SENTRY_URL"),
+    traces_sample_rate=1.0,
+)
+sentry_sdk.set_level("warning")
 
 creds = service_account.Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
 service = build("sheets", "v4", credentials=creds)
